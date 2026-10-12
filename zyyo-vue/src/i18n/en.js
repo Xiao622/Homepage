@@ -67,11 +67,19 @@ export default {
     intro:
       "I'm Fu, known as Leo in English — a quiet-but-wild green old man [INFJ]. I graduated in 2023 and started blogging in my first year of work, hoping to leave some traces of myself on the internet. I love music and games, occasionally attend comic conventions, and cosplay characters I admire and long for. I enjoy writing and recording the crumbs of daily life; my novel “The Cage of Fate” is being updated...",
     contacts: [
-      { href: 'https://github.com/Xiao622', label: 'GitHub', value: 'Xiao622' },
-      { href: 'mailto:i@Leo.net', label: 'Email', value: '2468132707@qq.com' },
-      { href: '#', label: 'QQ', value: '2468132707' },
-      { href: '#', label: 'WeChat', value: '东方喻晓' },
+      { type: 'link', label: 'GitHub', value: 'Xiao622', href: 'https://github.com/Xiao622/' },
+      { type: 'mailto', label: 'Email', value: '2468132707@qq.com' },
+      { type: 'image', label: 'QQ', value: '2468132707', img: '/uploads/photos/qq1.jpg' },
+      { type: 'image', label: 'WeChat', value: '东方喻晓', img: '/uploads/photos/wechat1.jpg' },
     ],
+    contactModal: {
+      mailTitle: 'Send an email',
+      from: 'From',
+      mailHint: 'Copy the sender address and write with your usual email client.',
+      copy: 'Copy address',
+      copied: 'Copied',
+      close: 'Close',
+    },
     toc: [
       { id: 'contacts', label: 'Contacts' },
       { id: 'stats', label: 'Some numbers' },
@@ -140,12 +148,7 @@ export default {
     projectsTitle: 'Open source',
     projectsDesc: 'More experiments on GitHub.',
     projects: [
-      { name: 'typecho-theme-Leo', status: 'stable', desc: 'An elegant theme based on Typecho design', tags: ['Typecho', 'PHP', '主题'] },
-      { name: 'homepage', status: 'stable', desc: 'My personal homepage — minimal, a personal nav', tags: ['CSS', '主页'] },
-      { name: 'fuck-shuwei', status: 'active', desc: 'A course-selection client for the Shuwei academic system, built on Node.js', tags: ['JavaScript', 'Node.js', '选课'] },
-      { name: 'ruijie-electron', status: 'active', desc: 'Ruijie campus-network auth tool, Windows / Electron', tags: ['Electron', 'JavaScript', '工具'] },
-      { name: 'fuckDemo', status: 'demo', desc: 'A collection of small demos', tags: ['Vue', 'Demo'] },
-      { name: 'Xiao622', status: 'stable', desc: 'My personal repo', tags: ['Profile'] },
+      { name: 'Homepage', href: 'https://github.com/Xiao622/Homepage', status: 'stable', desc: 'My personal homepage, minimalist homepage, personal navigation', tags: ['主页', 'Vue', 'Springboot', 'Java'] },
     ],
     statusText: { stable: 'Stable', active: 'Active', demo: 'Demo' },
     featuresTitle: 'About this site',

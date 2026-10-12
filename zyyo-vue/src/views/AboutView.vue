@@ -1,17 +1,40 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { t } from '@/i18n'
 
 /**
  * 关于页：个人介绍、联系方式、数据、博客历史、技术栈、个人特点、开源项目、关于小站。
  * 桌面端右侧提供目录（TOC）锚点跳转。
  * 所有文字为前端固定文案，随右上角语言切换（zh / en）。
+ * 联系方式：GitHub 直接外链；Email 弹出发件邮箱弹窗；QQ / 微信 弹出二维码图片。
  */
 const toc = computed(() => t('about.toc'))
 const about = computed(() => t('about'))
 const statusText = (s) => {
   const map = t('about.statusText')
   return (map && map[s]) || s
+}
+
+/** 联系方式弹窗（mailto 弹窗 / 图片弹窗），null 表示关闭 */
+const contactModal = ref(null)
+const copied = ref(false)
+
+function openContact(c) {
+  if (c.type === 'link') {
+    window.open(c.href, '_blank', 'noopener')
+    return
+  }
+  copied.value = false
+  contactModal.value = c
+}
+
+async function copyEmail(v) {
+  try {
+    await navigator.clipboard.writeText(v)
+    copied.value = true
+  } catch {
+    /* 剪贴板不可用时保持原样 */
+  }
 }
 </script>
 
@@ -29,17 +52,15 @@ const statusText = (s) => {
         <section id="intro" class="about-intro card card-pad">
           <p class="serif">{{ about.intro }}</p>
           <div class="contact-line">
-            <a
+            <button
               v-for="(c, i) in about.contacts"
               :key="c.label + i"
               class="contact-chip"
-              :href="c.href"
-              target="_blank"
-              rel="noopener"
+              @click="openContact(c)"
             >
               <span>{{ c.label }}</span>
               <span class="mono">{{ c.value }}</span>
-            </a>
+            </button>
           </div>
         </section>
 
@@ -115,7 +136,7 @@ const statusText = (s) => {
               v-for="(p, i) in about.projects"
               :key="p.name + i"
               class="project card card-pad"
-              :href="about.contacts[0].href"
+              :href="p.href || '#'"
               target="_blank"
               rel="noopener"
             >
@@ -174,6 +195,47 @@ const statusText = (s) => {
         </nav>
       </aside>
     </div>
+
+    <!-- 联系方式弹窗（邮件 / 二维码） -->
+    <Teleport to="body">
+      <div
+        v-if="contactModal"
+        class="contact-modal"
+        role="dialog"
+        aria-modal="true"
+        @click.self="contactModal = null"
+      >
+        <div class="contact-modal__box card">
+          <button
+            class="contact-modal__close"
+            :aria-label="about.contactModal.close"
+            @click="contactModal = null"
+          >✕</button>
+
+          <!-- 邮件弹窗 -->
+          <template v-if="contactModal.type === 'mailto'">
+            <h3 class="contact-modal__title serif">{{ about.contactModal.mailTitle }}</h3>
+            <p class="contact-modal__line">
+              {{ about.contactModal.from }}：<span class="mono">{{ contactModal.value }}</span>
+            </p>
+            <p class="contact-modal__hint">{{ about.contactModal.mailHint }}</p>
+            <button class="contact-modal__copy" @click="copyEmail(contactModal.value)">
+              {{ copied ? about.contactModal.copied : about.contactModal.copy }}
+            </button>
+          </template>
+
+          <!-- 二维码弹窗 -->
+          <template v-else>
+            <h3 class="contact-modal__title serif">{{ contactModal.label }}</h3>
+            <img
+              class="contact-modal__img"
+              :src="contactModal.img"
+              :alt="contactModal.label"
+            />
+          </template>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -216,10 +278,78 @@ const statusText = (s) => {
   border: 1px solid var(--card-border);
   background: var(--card-bg);
   font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
   color: var(--muted);
   transition: border-color 0.2s ease, color 0.2s ease;
 }
 .contact-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- 联系方式弹窗 ---------- */
+.contact-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+}
+.contact-modal__box {
+  position: relative;
+  width: min(92vw, 26rem);
+  padding: 1.6rem 1.5rem;
+  text-align: center;
+}
+.contact-modal__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  border: 0;
+  background: none;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--faint);
+  transition: color 0.2s ease;
+}
+.contact-modal__close:hover { color: var(--accent); }
+.contact-modal__title {
+  margin: 0 0 0.8rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.contact-modal__line {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.contact-modal__hint {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.contact-modal__copy {
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  background: var(--card-bg);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--accent);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.contact-modal__copy:hover { border-color: var(--accent); }
+.contact-modal__img {
+  display: block;
+  width: 100%;
+  max-width: 16rem;
+  margin: 0 auto;
+  border-radius: 0.6rem;
+}
 
 /* ---------- 通用小节 ---------- */
 .about-sec { scroll-margin-top: 5.5rem; }
