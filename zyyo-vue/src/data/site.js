@@ -4,11 +4,11 @@
 
 export const siteInfo = {
   name: 'Leo',
-  motto: '好的工具是安静的。用完之后，它会自己走开。',
+  motto: '做自己，感受每个年纪的美好和烦恼',
   mottoOrigin: '— 写代码时的一个念头',
   footer: '© 2026 Leo · Built with Vue 3 + Vite',
   rss: '#',
-  github: 'https://github.com/Leo666',
+  github: 'https://github.com/Xiao622',
   email: 'mailto:i@Leo.net',
 }
 
@@ -16,7 +16,7 @@ export const about = {
   intro:
     '我是 Leo，一个喜欢安静工具和干净画面的人。2020 年开始写博客，一直想把它做成「家」的样子——写写字，做点小工具，记录生活里的碎屑。',
   contacts: [
-    { label: 'GitHub', value: 'Leo666', href: 'https://github.com/Leo666' },
+    { label: 'GitHub', value: 'Xiao622', href: 'https://github.com/Xiao622' },
     { label: 'Email', value: 'i@Leo.net', href: 'mailto:i@Leo.net' },
     { label: 'QQ', value: '3509679579', href: '#' },
     { label: '微信', value: 'Leoynet', href: '#' },
@@ -67,7 +67,7 @@ export const about = {
     { name: 'fuck-shuwei', status: 'active', desc: '综合树维教务系统的选课排课客户端，基于 Node.js', tags: ['JavaScript', 'Node.js', '选课'] },
     { name: 'ruijie-electron', status: 'active', desc: '锐捷校园网认证工具，Windows / Electron', tags: ['Electron', 'JavaScript', '工具'] },
     { name: 'fuckDemo', status: 'demo', desc: '平时做的一些小 demo 合集', tags: ['Vue', 'Demo'] },
-    { name: 'Leo666', status: 'stable', desc: '我的个人仓库', tags: ['Profile'] },
+    { name: 'Xiao622', status: 'stable', desc: '我的个人仓库', tags: ['Profile'] },
   ],
   features: [
     { icon: '⚡', title: '静态生成', text: 'Astro 驱动，速度起飞' },
@@ -77,7 +77,7 @@ export const about = {
     { icon: '💬', title: '评论在线', text: 'Giscus 驱动' },
   ],
   closing:
-    '如果你也是慢慢生活、慢慢写东西的人，欢迎来打个招呼。邮件回得慢，但我一定会回。',
+    '人独自行过生命，蒙受玷污，承担罪过，痛饮苦酒，寻觅出路。',
 }
 
 /** 首页技术栈标签跑马灯 */

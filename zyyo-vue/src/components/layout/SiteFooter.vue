@@ -6,7 +6,7 @@ import { t } from '@/i18n'
  */
 const links = {
   rss: '#',
-  github: 'https://github.com/Leo666',
+  github: 'https://github.com/Xiao622',
   email: 'mailto:2468132707@qq.com',
 }
 </script>
