@@ -1,0 +1,23 @@
+{
+  "name": "Leo-vue",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Leo.net 的个人站点复刻 · Vue 3 + Vite 前端（预留 Spring Boot 接口层）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "leaflet": "^1.9.4",
+    "three": "^0.186.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.7"
+  }
+}

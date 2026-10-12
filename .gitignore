@@ -1,0 +1,12 @@
+# Maven 编译产物
+leo-server/target/
+
+# IDE
+.idea/
+
+# 日志
+*.log
+leo-server/backend.log*
+
+# Cloudflare Wrangler 缓存（含账号凭据）
+leo-server/.wrangler/

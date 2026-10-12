@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  项目级 Maven 配置：仅对 leo-server 生效，不影响全局 settings.xml。
+  原因：本机全局配置的阿里云镜像为已失效的 HTTP 地址，且 Maven 3.8+ 默认拦截 HTTP，
+  这里改用阿里云官方 HTTPS 公共仓库，保证依赖可下载。
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <mirrors>
+    <mirror>
+      <id>aliyun-public-https</id>
+      <name>Aliyun Public HTTPS</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>

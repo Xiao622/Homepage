@@ -1,0 +1,117 @@
+# -*- coding: utf-8 -*-
+"""Leo 站点开发记录 —— 14 篇系列文章数据（按开发时间线，倒序展示）。"""
+
+POSTS = [
+    # ---------------------------------------------------------------- 1
+    dict(
+        slug="202609220900", date="2026.09.22",
+        title="Leo 站点开发记录 #01：项目启动，技术选型与工程搭建",
+        excerpt="复刻 zyyo.net 的第一步：选定 Vue 3 + Vite 技术栈，搭好分层目录、axios 接口层与路由骨架，为后续十个阶段打地基。",
+        minutes=6, tags="本站,开发,Vue,Vite",
+        content="""<h2>为什么是复刻练习</h2><p>想把 zyyo.net 的界面结构与视觉风格完整搬下来，再逐步改造成自己的样子。第一步不是写代码，而是把目标拆清楚：先做出「长得像」的静态页面，再接入真实数据，最后做成可编辑的完整站点。</p><h2>技术栈选型</h2><ul><li>前端：Vue 3（组合式 API + &lt;script setup&gt;）+ Vite 开发服务器，热更新开发效率高。</li><li>路由：vue-router（history 模式），页面组件统一放在 src/views。</li><li>请求：axios 统一封装，拦截器自动处理统一返回体 { code, message, data }，预留与 Spring Boot 对接的接口层。</li><li>主题：CSS 变量驱动的浅色 / 深色双主题。</li></ul><h2>工程结构</h2><p>src 下按职责分层：views（页面）、components（可复用组件）、composables（组合式逻辑）、api（接口模块统一出口）、data（Mock 数据）、router、styles。</p><h2>接口层预留</h2><p>api/index.js 作为统一出口，每个业务一个 modules 文件；http.js 内置 axios 实例与响应拦截器。开发环境 .env.development 设 VITE_USE_MOCK=false 即走真实接口，true 则回落到 Mock 数据——前端可以在后端就绪前独立开发。</p><h2>遇到的坑</h2><ul><li>SPA 路由刷新 404：开发阶段交给 Vite 的 history 回退，生产部署需要服务器把未匹配路由指回 index.html。</li><li>跨域：开发期用 Vite 代理 /api 与 /uploads 到后端 8080，绕开 CORS 配置问题。</li></ul>""",
+    ),
+    # ---------------------------------------------------------------- 2
+    dict(
+        slug="202609231100", date="2026.09.23",
+        title="Leo 站点开发记录 #02：站点骨架，Home 布局与全局组件",
+        excerpt="搭出第一个可见版本：顶栏导航、Home 3×3 网格（Hero / Now Playing / 时钟 / Console / Theme / Photos / SiteInfo）、音乐抽屉与加载动画。",
+        minutes=7, tags="本站,开发,前端,布局",
+        content="""<h2>顶部导航</h2><p>Logo（悬停出现扫描线动画）+ 站点菜单 + 右侧操作区：音乐抽屉开关、主题开关、账户按钮；移动端收起为汉堡菜单。菜单顺序 Home · Blog · Notes · Photos · Music · About，About 固定在中间导航最右侧。</p><h2>Home 的 3×3 网格</h2><ul><li>Hero 自我介绍卡：左侧文案 + 右侧 GLB 3D 模型，支持鼠标左右拖动旋转（Three.js 加载本地 .glb 文件）。</li><li>Now Playing 音乐卡：展示当前播放曲目，与顶栏抽屉共用全局播放器状态。</li><li>Now 时钟卡：实时时钟与日期（JS 定时器驱动）。</li><li>Console 终端卡：打字机效果，问题永远在第一行、回答永远在第二行，播完轮回复位。</li><li>Theme 主题切换卡、Photos 相册卡、SiteInfo 站点信息卡（社交链接 + 跑马灯标签）。</li></ul><h2>全局状态</h2><p>音乐播放器用模块级单例 composable（useMusicPlayer）：顶栏抽屉、Home NowPlaying、Music 页三方共享同一份播放列表与播放状态，切换页面不中断。</p><h2>加载动画</h2><p>首屏展示 Leo 品牌加载动画，字母逐个浮现 + 扫描线划过。这个动画后来出了个著名的 bug，见下一篇。</p>""",
+    ),
+    # ---------------------------------------------------------------- 3
+    dict(
+        slug="202609241200", date="2026.09.24",
+        title="Leo 站点开发记录 #03：品牌迁移，Zyyo → Leo 与「Zppo」谜案",
+        excerpt="全站字段替换 Zyyo → Leo 后，加载动画仍显示 Zppo？排查发现品牌文案不止存在于页面，还藏在站点配置 JSON 里。",
+        minutes=4, tags="本站,开发,Bug",
+        content="""<h2>批量替换</h2><p>把页面里所有 Zyyo 字段替换为 Leo：Logo、标题、页脚、文案。用全局搜索逐处核对，确保没有遗漏。</p><h2>加载动画残留 Zppo</h2><p>替换完成后，第一次进入站点仍看到加载动画显示 Zppo，而不是 Leo。页面代码里明明已经全部替换，为什么还有残留？</p><p>排查发现：加载动画的文案并不在页面代码里，而是从后端站点配置（t_site_config 的 name 字段）读取——数据层是另一个「页面」。</p><h2>修复</h2><p>把数据库里站点配置的 name 同步改为 Leo，并把这个教训记下来：全站品牌字段 = 前端文案 + 后端数据 + 第三方配置，三处都要查。</p><h2>经验</h2><blockquote>替换关键词时，永远要覆盖「代码」和「数据」两个层面；动画、标题这类看似前端的文案，来源可能是接口。</blockquote>""",
+    ),
+    # ---------------------------------------------------------------- 4
+    dict(
+        slug="202609251000", date="2026.09.25",
+        title="Leo 站点开发记录 #04：后端与数据库，Spring Boot + MyBatis-Plus + MySQL",
+        excerpt="建库建表 8 张，统一返回体与登录 Token；五个业务模块的查询接口全部就绪。顺带解决端口占用与中文乱码两个环境坑。",
+        minutes=8, tags="Spring Boot,MyBatis-Plus,MySQL,后端",
+        content="""<h2>数据库设计</h2><p>按参考图建好 leo_blog 数据库，共 8 张表：</p><ul><li>t_post 文章（slug 唯一键、日期、标题、摘要、正文、阅读时长、标签）</li><li>t_tag 标签云、t_note 随记、t_site_config 站点配置（JSON 存储 about 整段数据）</li><li>t_marquee_tag 跑马灯标签、t_photo 相册照片、t_photo_comment 照片评论、t_track 音乐曲目</li></ul><h2>后端结构</h2><ul><li>Spring Boot 3.2.5 + MyBatis-Plus（LambdaQueryWrapper 链式查询）+ Lombok。</li><li>统一返回体 Result { code, message, data }，登录校验失败返回 401。</li><li>登录：账号密码存 t_site_config（admin_accounts JSON 数组，支持多管理员），TokenStore 内存存储、30 分钟过期。</li><li>控制器：Post / Note / Site / Photo / Music 五个，查询接口全部公开。</li></ul><h2>接口一览</h2><p>文章列表 / 详情 / 标签云、随记列表（时间 / 随机 / 关键词搜索）、站点信息、照片列表（分类 + 年月筛选 + 相册分组）、曲目列表。所有写操作（增删改）都要求登录 token。</p><h2>遇到的坑</h2><ul><li>8080 端口被占用：后端启动失败提示 Web server failed to start，杀掉监听进程后重启解决。</li><li>中文写入乱码：PowerShell / MySQL CLI 编码不稳，统一改用 Python + pymysql 写入数据库，UTF-8 全程可控。</li><li>上传文件静态映射 404：WebConfig 静态资源映射不生效，改为 Controller 用 FileSystemResource 按文件名回放文件流，走 /uploads 代理访问。</li></ul>""",
+    ),
+    # ---------------------------------------------------------------- 5
+    dict(
+        slug="202609272000", date="2026.09.27",
+        title="Leo 站点开发记录 #05：Home 编辑模式，管理员登录与原地编辑",
+        excerpt="顶栏账户按钮登录后进入编辑模式：页面文字 contenteditable 原地编辑、浮动保存条整体提交；固定文案锁定不可改。修复了编辑不生效的经典 bug。",
+        minutes=6, tags="编辑模式,登录,本站",
+        content="""<h2>管理员体系</h2><p>顶栏账户按钮打开登录弹窗，输入管理员账号密码（fuxiaotian19 / dilraba.8 与 123123 / 123123）进入编辑模式；再次点击铅笔图标退出。登录状态存 localStorage，请求自动附带 Bearer token。</p><h2>原地编辑</h2><p>编辑模式下页面文字变为 contenteditable，直接点文字修改；有改动时右下角浮动保存条提示「修改模式 · 有未保存修改」，点击保存整体 PUT /api/home 提交。</p><h2>固定文案锁定</h2><p>部分文案（Toggle theme、Broken thoughts、Now Playing、相片集等）属于设计的一部分，不参与编辑，保证布局与品牌一致性。</p><h2>经典 Bug：编辑了但没生效</h2><p>进入编辑模式修改自我介绍并保存后，退出编辑模式发现内容没变化；再进入编辑模式，又显示的是修改后的文字。</p><p>根因：展示模式从接口数据渲染，编辑模式的 contenteditable 是另一份副本；保存成功后展示层没有同步刷新。修复：保存接口返回最新数据，成功后回填展示层 DOM；并统一回填逻辑（v-fill 指令只回填未聚焦字段，不覆盖用户正在输入的内容）。</p><h2>经验</h2><blockquote>「编辑副本」与「展示视图」是两份数据时，保存成功后的同步回填是必须的一步，否则用户会看到编辑失效的假象。</blockquote>""",
+    ),
+    # ---------------------------------------------------------------- 6
+    dict(
+        slug="202609281500", date="2026.09.28",
+        title="Leo 站点开发记录 #06：Blog 列表、详情页与目录列",
+        excerpt="Blog 页成型：列表卡片（日期 + 标题 + 摘要 + 标签）、详情页正文 + 右侧 On this page 目录列（滚动高亮），去掉列表卡片右上角的分钟数。",
+        minutes=6, tags="本站,Blog,前端",
+        content="""<h2>列表页</h2><p>卡片式列表：日期 + 标题 + 摘要 + 标签，点击进入详情。按日期倒序，支持标签筛选。细节：列表卡片右上角原本显示「5 min / 6 min」阅读时长，被去掉——阅读时长只在详情页保留。</p><h2>详情页</h2><ul><li>文章头：标题、日期、标签；正文富文本 HTML 渲染。</li><li>右侧「On this page」目录列：自动提取正文中的 h1/h2/h3 生成目录，滚动时高亮当前章节，点击平滑跳转——完全还原参考站。</li><li>响应式：窄屏（&lt; 860px）隐藏目录列，正文占满。</li></ul><h2>正文渲染细节</h2><p>正文用 v-html 渲染后端返回的 HTML；代码、列表、引用块等样式通过 :deep() 选择器作用到内容上。摘要字段在正文为空时作为回退展示。</p><h2>遇到的坑</h2><ul><li>目录提取时机：v-html 渲染是异步的，必须在 nextTick 之后才能取到标题节点。</li><li>滚动高亮：监听 window scroll，按标题距顶部位置计算当前章节。</li></ul>""",
+    ),
+    # ---------------------------------------------------------------- 7
+    dict(
+        slug="202609291600", date="2026.09.29",
+        title="Leo 站点开发记录 #07：Blog 页面内编辑与 Word 同款样式栏",
+        excerpt="编辑模式升级：放弃弹窗，直接在详情页内编辑；选中文字弹出 Word 同款样式栏（加粗、字号、颜色）；新建文章走空模板页，slug 用年月日时分编号。",
+        minutes=8, tags="Blog,编辑器,本站",
+        content="""<h2>页面内编辑</h2><p>第一版编辑模式用弹窗，用户反馈不舒服，改为与 Home 页一致的页面内编辑：详情页直接点标题、日期、标签、正文修改，浮动保存条统一保存。</p><h2>Word 同款样式栏</h2><p>编辑正文时选中文字，出现悬浮样式栏：加粗、斜体、字号、文字颜色、清除格式。实现：document.execCommand + styleWithCSS，操作选中范围；样式栏跟随选区位置弹出，失焦隐藏。</p><h2>新建文章</h2><p>列表页「＋ New post」跳转空模板页（/blog/new），填写标题 / 日期 / 摘要 / 正文 / 标签后保存。保存成功跳转到新文章详情页。</p><h2>slug 编号方案</h2><p>参考站路由用标题拼音（typecho-to-astro），我们决定改用更简单的方案：年月日时分编号（如 202609292009），同分钟冲突自动加后缀，避免中文 / 拼音的歧义与重名问题。</p><h2>删除</h2><p>编辑模式下详情页显示「✕ 删除」，二次确认后删除并返回列表。删除时同步标签云计数（文章标签 count -1，归零自动移除）。</p><h2>遇到的坑</h2><ul><li>execCommand 已废弃但仍是 contenteditable 唯一可靠的富文本操作方式，注意 styleWithCSS 的兼容性。</li><li>样式栏的选区定位：用 getSelection + getBoundingClientRect 计算，滚动 / 输入变化时要重新定位。</li></ul>""",
+    ),
+    # ---------------------------------------------------------------- 8
+    dict(
+        slug="202609301400", date="2026.09.30",
+        title="Leo 站点开发记录 #08：Notes 随记，当前页编辑与搜索框",
+        excerpt="随记页时间线成型：当前页直接编辑时间与内容、可新建删除；Notes 与 Blog 页接入 300ms 防抖模糊搜索，标题与正文都能搜到。",
+        minutes=5, tags="Notes,搜索,本站",
+        content="""<h2>随记时间线</h2><p>Notes 页按日期倒序展示一条条随记：日期 + 内容，长文可展开。编辑模式直接在当前页修改日期与内容（contenteditable），「＋ New note」在顶部插入空卡片，卡片右上角 ✕ 删除，改动统一浮动保存条提交。</p><h2>搜索框</h2><p>Notes 与 Blog 页各加一个搜索框：输入 300ms 防抖后请求后端 keyword 参数，对标题与正文做 LIKE 模糊查询，空结果给出提示。</p><h2>排序逻辑</h2><p>种子随记的日期格式混杂（2026-9-17 与 09-11 并存），后端用「年份补全 + 月日补零」的语义键在内存排序，保证新建随记自然置顶，跨格式日期也能正确排序。</p><h2>遇到的坑</h2><ul><li>防抖：连续输入触发多次请求，setTimeout 300ms 合并，避免接口压力与列表闪烁。</li><li>contenteditable 回填覆盖用户输入：回填只在编辑模式切换 / 数据加载时执行，正在编辑的元素跳过（沿用 v-fill 的思路）。</li></ul>""",
+    ),
+    # ---------------------------------------------------------------- 9
+    dict(
+        slug="202610011300", date="2026.10.01",
+        title="Leo 站点开发记录 #09：About 页 87 个字段的编辑模式",
+        excerpt="关于页全部字段接入编辑：data-path 定位 + 自定义 v-fill 指令回填；保存时自动还原类型（tags 数组、status 中英文、数字字段）。",
+        minutes=6, tags="About,编辑模式,本站",
+        content="""<h2>87 个可编辑字段</h2><p>About 页数据是一整段 JSON（intro、contacts、stats、history、skills、traits、projects、features、closing、motto 等），共 87 个展示字段。全部接入编辑模式：每个文本节点带 data-path 属性定位到 JSON 里的具体路径。</p><h2>自定义指令 v-fill</h2><p>写了一个 v-fill 指令：进入编辑模式时，按 data-path 从后端数据回填 DOM；回填跳过正在聚焦（用户正在编辑）的元素，避免打断输入。展示模式则直接渲染接口数据。</p><h2>保存与类型还原</h2><p>保存时遍历 DOM 收集文本 → 按 data-path 写回 draft JSON → 整体 PUT /api/about。类型还原是关键：tags 拆回数组、status 中英文互转、数字字段 parseFloat 还原，避免「字符串数字」污染数据结构。</p><h2>遇到的坑</h2><ul><li>嵌套结构（projects 是对象数组）：data-path 用点路径如 projects.0.name，deepGet / deepSet 处理。</li><li>编辑模式切回展示模式必须重建 DOM，否则内容停留在编辑态。</li></ul>""",
+    ),
+    # ---------------------------------------------------------------- 10
+    dict(
+        slug="202610031000", date="2026.10.03",
+        title="Leo 站点开发记录 #10：Photos 上传、删除、分类与年月筛选",
+        excerpt="照片页基础功能：格式白名单上传、删除、自由分类、年月筛选；修复浅色主题下日历图标「消失」的 UA 控件颜色问题。",
+        minutes=6, tags="Photos,相册,图片",
+        content="""<h2>上传与删除</h2><p>编辑模式「＋ Upload」上传照片（multipart：文件 + 分类 + 拍摄时间 + 说明），后端做格式白名单校验（jpg/jpeg/png/gif/webp/bmp/avif/svg）；照片文件存 uploads/ 目录，数据库记录相对路径，Controller 按文件名回放文件流。</p><h2>分类与年月筛选</h2><p>每张照片可归入任意分类；列表页支持分类名模糊 + 年月（type=month 输入框）筛选，时间倒序。上传时可指定拍摄时间（精确到月或日）。</p><h2>编辑模式</h2><p>登录后每张照片卡片出现 ✕ 删除按钮与原地可编辑信息（分类 / 时间 / 说明），浮动保存条统一提交。</p><h2>Bug：浅色主题下日历图标不可见</h2><p>年月筛选的原生 date input 在白天模式下，右侧日历图标是白色，浅色背景上看不见。一开始给 .month-input::-webkit-calendar-picker-indicator 加 filter 想改图标颜色，无效——原生控件颜色只受 color-scheme 控制。</p><p>修复：input 的 color-scheme 跟随主题（浅色 light / 深色 dark），图标自动变成对应主题的颜色。</p><h2>经验</h2><blockquote>UA 控件（日历、滚动条等）的样式开关是 color-scheme，作者 CSS 改不动它；跟主题联动时直接切 color-scheme 而不是写 filter。</blockquote>""",
+    ),
+    # ---------------------------------------------------------------- 11
+    dict(
+        slug="202610051000", date="2026.10.05",
+        title="Leo 站点开发记录 #11：Photos 相册化、大图弹窗与评论栏",
+        excerpt="参照 QQ 相册升级为三级结构：相册列表 → 相册详情 → 大图弹窗（翻页、下载、弹窗内上传、作者描述 + 访客评论）。删除照片连带清评论。",
+        minutes=8, tags="Photos,相册,评论",
+        content="""<h2>三级相册结构</h2><ul><li>相册列表 /photos：按分类分组，封面取相册最新一张，显示张数，点击进入。</li><li>相册详情 /photos/:category：该相册照片网格 + 年月筛选 + 编辑模式上传 / 删除 / 原地改信息。</li><li>大图弹窗：点击任意照片弹出，QQ 相册风格。</li></ul><h2>大图弹窗功能</h2><ul><li>左右箭头 / 键盘 ← → 翻页，Esc 关闭，显示页码（如 2 / 3）。</li><li>「⭳ 下载」触发浏览器直接下载原图到本地。</li><li>编辑模式弹窗内「＋ 上传」：上传到当前相册，完成后自动跳到新照片。</li><li>右侧评论栏：上方作者描述（说明 + 拍摄时间），下方访客评论列表；访客无需登录即可评论（昵称 + 内容 + 时间戳）。</li></ul><h2>数据与接口</h2><p>新增 t_photo_comment 表；接口：GET /api/photos/albums（相册分组 + 封面）、GET/POST /api/photos/{id}/comments（评论读写）、DELETE /api/photos/{id}（删除照片与磁盘文件）。</p><h2>Bug：删除照片留下孤儿评论</h2><p>第一版删除照片只删照片行和文件，评论表里残留 photo_id 指向已删照片。修复：删除照片时连带删除该照片的全部评论（DELETE 前先按 photo_id 清理评论表）。</p><h2>响应式</h2><p>窄屏下弹窗评论栏自动移到图片下方，保证移动端可用。</p>""",
+    ),
+    # ---------------------------------------------------------------- 12
+    dict(
+        slug="202610061400", date="2026.10.06",
+        title="Leo 站点开发记录 #12：Music 曲目墙与全局播放器联动",
+        excerpt="新增 Music 页，布局参考深蓝互动官网 MUSIC 板块：3 张主推大卡 + 曲目网格；点击即播放，与顶栏抽屉、首页 Now Playing 三方联动。",
+        minutes=6, tags="Music,音乐,播放器",
+        content="""<h2>曲目墙布局</h2><p>参考 re.bluepoch.com 官网 MUSIC 板块，做成 Leo 风格：MUSIC 大标题 + 副文案，顶部 3 张主推大卡（封面渐变 + 音符图标 + 播放按钮 + 中文 / 英文曲名 + 时长），下方 All tracks 网格。</p><h2>封面占位方案</h2><p>曲目表 t_track 存 cover_seed（0~7），前端按 seed 生成不同色相的渐变封面，不存图片文件；接入真实封面 / 音频后替换 url 字段即可无缝切换。</p><h2>播放联动</h2><p>点击任意曲目卡 → 全局播放器单例 select(index) 播放：当前播放卡高亮（accent 边框 + PLAYING 角标 + 底部进度条），播放按钮变暂停；顶栏抽屉、首页 Now Playing 卡片实时同步。实测 Music 页点歌后回首页，Now Playing 显示同一曲目。</p><h2>数据</h2><p>后端 GET /api/music/tracks 返回曲目列表（公开），种子 8 首 Leo Tapes 风格的原创曲目；前端播放进度为模拟推进（无真实音频源），README 已注明接入真实音频的改法。</p><h2>导航</h2><p>菜单顺序调整：Home · Blog · Notes · Photos · Music · About。</p>""",
+    ),
+    # ---------------------------------------------------------------- 13
+    dict(
+        slug="202610071500", date="2026.10.07",
+        title="Leo 站点开发记录 #13：Home Photos 联动与踩坑清单",
+        excerpt="Home 的 Photos 栏展示最近上传的 4 张照片（limit 参数），点击直达相册；修复 Blog 详情页白天模式黑底白字问题，汇总全部踩坑经验。",
+        minutes=6, tags="本站,开发,踩坑",
+        content="""<h2>Home Photos 联动</h2><p>Home 页 Photos 卡从占位文案升级为真实数据：GET /api/photos?limit=4（后端新增可选 limit 参数）取最近上传的 4 张照片，缩略图网格渲染（object-fit: cover + hover 放大）；点击缩略图跳转到对应相册详情页，与 Photos 页实时联动；不足 4 张时自适应显示实际张数。</p><h2>Bug：Blog 详情页白天模式黑底白字</h2><p>浅色主题下打开 Blog 详情页，正文是黑底白字。排查发现正文里内联了硬编码深色背景样式（background-color: rgb(10,10,10)）——当初从参考站复制内容时带进来的，浅色主题下没有跟随主题。</p><p>修复：详情页展示模式统一清除正文内联背景色（背景强制透明跟随主题，用户样式栏设置的文字颜色、加粗、字号不受影响），以后粘贴深色内容也不会再出问题。</p><h2>踩坑清单（全站）</h2><ul><li>加载动画遗留 Zppo：品牌文案藏在站点配置 JSON 里，代码替换覆盖不到数据层。</li><li>浅色主题日历图标不可见：UA 控件颜色只受 color-scheme 控制。</li><li>Blog 黑底白字：复制内容带入的内联深色背景。</li><li>编辑不生效：编辑副本与展示视图未同步，保存后要回填。</li><li>8080 端口占用：先杀监听进程再启动。</li><li>后端重启 token 全失效：Token 存内存，重启即清，需重新登录。</li><li>中文写入乱码：PowerShell / MySQL CLI 编码不稳，改用 Python + pymysql。</li><li>上传文件静态映射 404：改为 Controller 文件流回放。</li></ul><h2>现状</h2><p>Home / Blog / Notes / About / Photos / Music 六个页面全部接入编辑模式与真实接口。下一步：接入真实音频源、Blog 评论功能、部署上线。</p>""",
+    ),
+    # ---------------------------------------------------------------- 14
+    dict(
+        slug="202610081600", date="2026.10.08",
+        title="Leo 站点开发记录 #14：Music 音乐上传，音频 + 封面 + 歌名 + 演唱者",
+        excerpt="音乐功能补齐上传闭环：曲目表加真实音频与封面字段，上传接口落盘 uploads/music，前端编辑模式弹窗上传、卡片删除、真实 &lt;audio&gt; 播放。",
+        minutes=7, tags="Music,音乐,上传,文件存储",
+        content="""<h2>需求</h2><p>Music 页此前只有 8 首种子曲目（封面为渐变色块、播放为模拟推进），缺少自建内容的能力。本次补齐上传：音频文件 + 封面图片 + 歌曲名称 + 演唱者四个要素，并让播放器真正出声。</p><h2>数据库</h2><p>t_track 新增两列：url VARCHAR(500)（真实音频地址）、cover VARCHAR(500)（封面图片地址），与原有 id / title / en_title / artist / duration / cover_seed / created_at 并存——无封面上传的曲目继续用 cover_seed 渐变占位。</p><h2>后端接口</h2><ul><li>POST /api/music/tracks（需登录，multipart）：音频必传 + 歌名 / 演唱者必填，封面可选；音频格式白名单（mp3 / wav / ogg / m4a / flac / aac / webm），图片 jpg / png / gif / webp / bmp / avif / svg。</li><li>文件落盘：音频存 uploads/music/，封面存 uploads/music/covers/，UUID 文件名防冲突；时长不填默认 180 秒。</li><li>DELETE /api/music/tracks/{id}（需登录）：删数据库行，并连带删除磁盘上的音频与封面文件，不留孤儿文件。</li><li>GET /api/music/tracks 仍公开，曲目列表带 url / cover 真实字段。</li></ul><h2>前端</h2><ul><li>Music 页编辑模式：页头 Upload 按钮 → 弹窗六行表单（音频* / 封面 / 歌曲名称* / 演唱者* / 英文曲名 / 时长），校验后 multipart 提交，成功后刷新列表。</li><li>每张曲目卡右上角 ✕ 删除（编辑模式出现），confirm 后调删除接口并刷新，播放索引自动校正。</li><li>封面：有 cover 直接显示真实图，否则按 cover_seed 生成渐变——上传带封面后立即呈现。</li><li>播放器重写为真实播放：模块级 new Audio() 单例，有 url 时 timeupdate 驱动进度、ended 自动切歌、切歌先 pause + 清 src；无 url 的旧曲目保持模拟推进兼容。</li></ul><h2>端到端验证</h2><p>浏览器自动化走完整流程：登录 → Upload → 上传测试 wav + 封面 → 列表出现新曲目（真实封面 / 演唱者行 / 时长 0:02）→ 真实点击播放，网络请求加载 wav、进度条实时走动、PLAYING 高亮 → 删除测试曲目，磁盘文件一并清理、列表回到 8 首。</p><h2>遇到的坑</h2><ul><li>JDK 23 + Lombok 1.18.32 编译失败：PhotoService 报 PhotoComment getter/setter 找不到，Lombok 版本不支持新 JDK 注解处理；改用 JDK 17（与 pom target 一致）打包成功。</li><li>浏览器自动化上传文件：CSS 选择器两次匹配失败，改回 ref 方式上传成功；属于验证工具层的坑，功能本身没问题。</li><li>真实播放「没声音」：程序化 click() 不携带用户手势，被浏览器自动播放策略拦截；真实鼠标事件点击后音频正常加载播放。</li><li>中文写库仍用 Python + pymysql，避免 PowerShell / MySQL CLI 乱码。</li></ul><h2>存储位置</h2><p>音乐与封面统一存在后端 leo-server/uploads/music/（封面在 covers/ 子目录），与照片 uploads/ 同根，目录由上传接口自动创建。</p>""",
+    ),
+]
